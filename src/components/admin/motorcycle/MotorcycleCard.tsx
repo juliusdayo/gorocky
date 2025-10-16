@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Motorcycle } from "./types";
 import ConfirmationModal from "./ConfirmationModal";
 
@@ -14,6 +15,7 @@ export default function MotorcycleCard({
   onDelete,
 }: MotorcycleCardProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const router = useRouter();
 
   const handleDeleteClick = () => {
     setShowDeleteModal(true);
@@ -27,11 +29,19 @@ export default function MotorcycleCard({
   const handleCancelDelete = () => {
     setShowDeleteModal(false);
   };
+
+  const handleViewDetails = () => {
+    router.push(`/motorcycles/${motorcycle.id}`);
+  };
   return (
     <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h3
+            onClick={handleViewDetails}
+            className="text-lg font-semibold text-gray-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 cursor-pointer transition-colors"
+            title="Click to view details"
+          >
             {motorcycle.year} {motorcycle.brand} {motorcycle.modelName}
           </h3>
           <p className="text-2xl font-bold text-orange-600 mt-1">
@@ -100,10 +110,16 @@ export default function MotorcycleCard({
         </div>
       )}
 
-      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
         <p className="text-xs text-gray-500 dark:text-gray-400">
           Listed on {new Date(motorcycle.createdAt).toLocaleDateString()}
         </p>
+        <button
+          onClick={handleViewDetails}
+          className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+        >
+          View Details & Bids →
+        </button>
       </div>
 
       {/* Delete Confirmation Modal */}

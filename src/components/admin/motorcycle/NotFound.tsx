@@ -1,4 +1,4 @@
-export default function NotFound({ filters }: { filters: any }) {
+export default function NotFound(params: any) {
   return (
     <div className="text-center py-12">
       <svg
@@ -19,7 +19,7 @@ export default function NotFound({ filters }: { filters: any }) {
         No motorcycles found
       </h3>
       <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        {Object.values(filters).some((value) => value)
+        {Object.values(params.filters).some((value) => value)
           ? "Try adjusting your filters or add your first motorcycle listing."
           : "Get started by adding your first motorcycle listing."}
       </p>
