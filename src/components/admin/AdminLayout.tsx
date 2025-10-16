@@ -2,7 +2,7 @@
 
 import { useState, useEffect, ReactNode } from "react";
 import { User } from "@supabase/supabase-js";
-import { supabase } from "../../lib/supabase";
+import { createClient } from "../../lib/supabase/client";
 import LoadingSpinner from "./LoadingSpinner";
 import AuthRequired from "./AuthRequired";
 import AdminHeader from "./AdminHeader";
@@ -23,6 +23,8 @@ export default function AdminLayout({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const supabase = createClient();
+
     const getUser = async () => {
       const {
         data: { user },
@@ -46,6 +48,7 @@ export default function AdminLayout({
   }, []);
 
   const handleSignOut = async () => {
+    const supabase = createClient();
     await supabase.auth.signOut();
   };
 
