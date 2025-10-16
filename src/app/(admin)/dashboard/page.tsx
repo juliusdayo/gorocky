@@ -10,7 +10,7 @@ export default function DashboardPage() {
       showDashboardLink={false}
     >
       {(user) => (
-        <main className="py-12 px-4">
+        <div className="p-8">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className="flex justify-between items-center mb-8">
@@ -101,7 +101,7 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
-        </main>
+        </div>
       )}
     </AdminLayout>
   );

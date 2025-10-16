@@ -6,6 +6,7 @@ import { supabase } from "../../lib/supabase";
 import LoadingSpinner from "./LoadingSpinner";
 import AuthRequired from "./AuthRequired";
 import AdminHeader from "./AdminHeader";
+import Sidebar from "./Sidebar";
 
 interface AdminLayoutProps {
   children: (user: User) => ReactNode;
@@ -63,7 +64,10 @@ export default function AdminLayout({
         onSignOut={handleSignOut}
         showDashboardLink={showDashboardLink}
       />
-      {children(user)}
+      <div className="flex h-screen pt-16">
+        <Sidebar className="w-64 fixed h-full" />
+        <main className="flex-1 ml-64 overflow-auto">{children(user)}</main>
+      </div>
     </div>
   );
 }

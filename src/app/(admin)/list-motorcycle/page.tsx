@@ -21,29 +21,31 @@ export default function ListMotorcyclePage() {
   return (
     <AdminLayout authMessage="You need to be signed in to list a motorcycle.">
       {() => (
-        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              List Your Motorcycle
-            </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
-              Fill out the form below to list your motorcycle for sale on
-              GoRocky.
-            </p>
-          </div>
+        <div className="p-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="mb-8">
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                List Your Motorcycle
+              </h1>
+              <p className="text-lg text-gray-600 dark:text-gray-300">
+                Fill out the form below to list your motorcycle for sale on
+                GoRocky.
+              </p>
+            </div>
 
-          <MotorcycleForm onSubmit={handleFormSubmit} />
+            <MotorcycleForm onSubmit={handleFormSubmit} />
 
-          {/* Back to Dashboard */}
-          <div className="mt-8 text-center">
-            <Link
-              href="/dashboard"
-              className="text-orange-600 hover:text-orange-700 font-medium"
-            >
-              ← Back to Dashboard
-            </Link>
+            {/* Back to Dashboard */}
+            <div className="mt-8 text-center">
+              <Link
+                href="/dashboard"
+                className="text-orange-600 hover:text-orange-700 font-medium"
+              >
+                ← Back to Dashboard
+              </Link>
+            </div>
           </div>
-        </main>
+        </div>
       )}
     </AdminLayout>
   );
