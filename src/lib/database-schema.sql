@@ -63,10 +63,14 @@ ON CONFLICT DO NOTHING;
 -- BUYERS AND SELLERS TABLES
 -- ================================================
 
+-- Drop existing unique constraints if they exist (for schema updates)
+ALTER TABLE IF EXISTS sellers DROP CONSTRAINT IF EXISTS sellers_user_id_key;
+ALTER TABLE IF EXISTS buyers DROP CONSTRAINT IF EXISTS buyers_user_id_key;
+
 -- Create sellers table (users who sell motorcycles)
 CREATE TABLE IF NOT EXISTS sellers (
   id BIGSERIAL PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE, -- Admin who added this seller
   business_name TEXT,
   contact_phone TEXT,
   contact_email TEXT,
@@ -78,14 +82,13 @@ CREATE TABLE IF NOT EXISTS sellers (
   total_sales INTEGER DEFAULT 0 CHECK (total_sales >= 0),
   verified BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(user_id)
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Create buyers table (users who bid on motorcycles)
 CREATE TABLE IF NOT EXISTS buyers (
   id BIGSERIAL PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE, -- Admin who added this buyer
   first_name TEXT,
   last_name TEXT,
   contact_phone TEXT,
@@ -96,8 +99,7 @@ CREATE TABLE IF NOT EXISTS buyers (
   zip_code TEXT,
   verified BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(user_id)
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Create bids table (many-to-many relationship between buyers and motorcycles)
