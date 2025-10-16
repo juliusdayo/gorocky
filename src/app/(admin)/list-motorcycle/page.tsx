@@ -4,18 +4,9 @@ import Link from "next/link";
 import { AdminLayout, MotorcycleForm } from "../../../components/admin";
 
 export default function ListMotorcyclePage() {
-  const handleFormSubmit = (formData: {
-    brand: string;
-    year: string;
-    odometer: string;
-    modelName: string;
-    upgrades: string[];
-  }) => {
-    // TODO: Handle form submission (send to API, database, etc.)
-    console.log("Form submitted:", formData);
-    alert(
-      "Motorcycle listing submitted! (This would normally save to a database)"
-    );
+  const handleFormSuccess = () => {
+    // Optionally redirect to motorcycles list or show success message
+    console.log("Motorcycle listed successfully!");
   };
 
   return (
@@ -33,7 +24,7 @@ export default function ListMotorcyclePage() {
               </p>
             </div>
 
-            <MotorcycleForm onSubmit={handleFormSubmit} />
+            <MotorcycleForm onSuccess={handleFormSuccess} />
 
             {/* Back to Dashboard */}
             <div className="mt-8 text-center">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "../lib/supabase";
+import { createClient } from "../lib/supabase/client";
 import { User } from "@supabase/supabase-js";
 
 interface AuthFormProps {
@@ -15,7 +15,7 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [user, setUser] = useState<User | null>(null);
-
+  const supabase = createClient();
   useEffect(() => {
     // Check if user is already logged in
     const getUser = async () => {
