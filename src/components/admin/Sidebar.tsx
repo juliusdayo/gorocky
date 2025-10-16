@@ -19,6 +19,11 @@ export default function Sidebar({ className = "" }: SidebarProps) {
       href: "/motorcycles",
       icon: "🏍️",
     },
+    {
+      name: "Buyers",
+      href: "/buyers",
+      icon: "👥",
+    },
   ];
 
   return (
