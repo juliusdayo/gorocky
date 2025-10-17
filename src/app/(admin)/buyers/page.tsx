@@ -3,8 +3,14 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { AdminLayout } from "../../../components/admin";
+import {
+  EditBuyerModal,
+  BuyersFilter,
+  BuyersDataTable,
+} from "../../../components/admin/buyer";
 import { Buyer, BuyerFilters } from "./types";
 import { fetchBuyers } from "./functions/fetchBuyers";
+import { updateBuyer } from "./functions/buyerUtils";
 
 export default function BuyersPage() {
   const router = useRouter();
@@ -17,6 +23,13 @@ export default function BuyersPage() {
     state: "",
     verified: "all",
   });
+
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"add" | "edit">("add");
+  const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [modalError, setModalError] = useState("");
 
   const handleFetchBuyers = useCallback(async () => {
     try {
@@ -101,6 +114,97 @@ export default function BuyersPage() {
     router.push(`/buyers/${buyerId}`);
   };
 
+  // Modal handlers
+  const handleAddBuyer = () => {
+    setModalMode("add");
+    setSelectedBuyer(null);
+    setIsModalOpen(true);
+    setModalError("");
+  };
+
+  const handleEditBuyer = (buyer: Buyer) => {
+    setModalMode("edit");
+    setSelectedBuyer(buyer);
+    setIsModalOpen(true);
+    setModalError("");
+  };
+
+  const handleDeleteBuyer = async (buyer: Buyer) => {
+    if (
+      !confirm(
+        `Are you sure you want to delete ${buyer.firstName} ${buyer.lastName}?`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/buyers/${buyer.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: "Failed to delete buyer" }));
+        throw new Error(errorData.error);
+      }
+
+      // Refresh the buyers list
+      await handleFetchBuyers();
+    } catch (error) {
+      console.error("Error deleting buyer:", error);
+      alert(
+        `Failed to delete buyer: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    }
+  };
+
+  const handleModalSave = async (updatedData: Partial<Buyer>) => {
+    try {
+      setModalLoading(true);
+      setModalError("");
+
+      if (modalMode === "add") {
+        // Create new buyer
+        const response = await fetch("/api/buyers", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedData),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to create buyer");
+        }
+      } else {
+        // Update existing buyer
+        if (!selectedBuyer) return;
+        await updateBuyer(selectedBuyer.id, updatedData);
+      }
+
+      // Refresh the buyers list
+      await handleFetchBuyers();
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error saving buyer:", error);
+      setModalError(
+        error instanceof Error ? error.message : "Failed to save buyer"
+      );
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleModalCancel = () => {
+    setIsModalOpen(false);
+    setModalError("");
+  };
+
   if (loading) {
     return (
       <AdminLayout
@@ -130,86 +234,43 @@ export default function BuyersPage() {
     >
       {() => (
         <div className="p-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              Buyers
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300">
-              View and manage all registered buyers in the system.
-            </p>
+          <div className="mb-8 flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                Buyers
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300">
+                View and manage all registered buyers in the system.
+              </p>
+            </div>
+            <button
+              onClick={handleAddBuyer}
+              className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                />
+              </svg>
+              <span>Add Buyer</span>
+            </button>
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
             {/* Filters */}
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                Filter Buyers
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={filters.name}
-                    onChange={handleFilterChange}
-                    placeholder="Search by name..."
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    City
-                  </label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={filters.city}
-                    onChange={handleFilterChange}
-                    placeholder="Search by city..."
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    State
-                  </label>
-                  <input
-                    type="text"
-                    name="state"
-                    value={filters.state}
-                    onChange={handleFilterChange}
-                    placeholder="Search by state..."
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Verification
-                  </label>
-                  <select
-                    name="verified"
-                    value={filters.verified}
-                    onChange={handleFilterChange}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white"
-                  >
-                    <option value="all">All</option>
-                    <option value="verified">Verified</option>
-                    <option value="unverified">Unverified</option>
-                  </select>
-                </div>
-              </div>
-              <div className="flex justify-end mt-4">
-                <button
-                  onClick={clearFilters}
-                  className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
-                >
-                  Clear Filters
-                </button>
-              </div>
-            </div>
+            <BuyersFilter
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              onClearFilters={clearFilters}
+            />
 
             {error && (
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
@@ -217,147 +278,44 @@ export default function BuyersPage() {
               </div>
             )}
 
-            {displayBuyers.length === 0 ? (
-              <div className="text-center py-12">
-                <svg
-                  className="mx-auto h-12 w-12 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
-                <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
-                  No buyers found
-                </h3>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  {Object.values(filters).some(
-                    (value) => value && value !== "all"
-                  )
-                    ? "Try adjusting your filters to see more buyers."
-                    : "No buyers have registered yet."}
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-hidden">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {displayBuyers.map((buyer) => (
-                    <div
-                      key={buyer.id}
-                      onClick={() => handleBuyerClick(buyer.id)}
-                      className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition-all cursor-pointer hover:border-orange-300 dark:hover:border-orange-600"
-                    >
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                            {buyer.firstName} {buyer.lastName}
-                          </h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            ID: {buyer.id}
-                          </p>
-                        </div>
-                        <div className="flex items-center">
-                          {buyer.verified ? (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
-                              <svg
-                                className="w-3 h-3 mr-1"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                              Verified
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
-                              Unverified
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                        <div className="flex items-center">
-                          <svg
-                            className="w-4 h-4 mr-2"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                            />
-                          </svg>
-                          {buyer.contactEmail}
-                        </div>
-                        {buyer.contactPhone && (
-                          <div className="flex items-center">
-                            <svg
-                              className="w-4 h-4 mr-2"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                              />
-                            </svg>
-                            {buyer.contactPhone}
-                          </div>
-                        )}
-                        {buyer.city && buyer.state && (
-                          <div className="flex items-center">
-                            <svg
-                              className="w-4 h-4 mr-2"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                              />
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                              />
-                            </svg>
-                            {buyer.city}, {buyer.state}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Registered on{" "}
-                          {new Date(buyer.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            <BuyersDataTable
+              buyers={displayBuyers}
+              filters={filters}
+              onView={handleBuyerClick}
+              onEdit={handleEditBuyer}
+              onDelete={handleDeleteBuyer}
+            />
           </div>
+
+          {/* Add/Edit Buyer Modal */}
+          {(modalMode === "edit" ? selectedBuyer : true) && (
+            <EditBuyerModal
+              isOpen={isModalOpen}
+              buyer={
+                modalMode === "edit" && selectedBuyer
+                  ? selectedBuyer
+                  : {
+                      id: 0,
+                      userId: "",
+                      firstName: "",
+                      lastName: "",
+                      contactEmail: "",
+                      contactPhone: "",
+                      address: "",
+                      city: "",
+                      state: "",
+                      zipCode: "",
+                      verified: false,
+                      createdAt: "",
+                      updatedAt: "",
+                    }
+              }
+              onSave={handleModalSave}
+              onCancel={handleModalCancel}
+              loading={modalLoading}
+              error={modalError}
+            />
+          )}
         </div>
       )}
     </AdminLayout>

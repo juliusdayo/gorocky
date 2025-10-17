@@ -24,7 +24,7 @@ export default function AdminHeader({
           </Link>
           <nav className="flex space-x-8 items-center">
             <Link
-              href="/"
+              href="/dashboard"
               className="text-gray-600 dark:text-gray-300 hover:text-orange-600 transition-colors"
             >
               Home

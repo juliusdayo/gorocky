@@ -108,12 +108,12 @@ export default function MotorcycleDetailPage() {
       <AdminLayout>
         {() => (
           <div className="text-center py-12">
-            <div className="text-red-600 mb-4">
+            <div className="text-red-600 dark:text-red-400 mb-4">
               {error || "Motorcycle not found"}
             </div>
             <button
               onClick={() => router.push("/motorcycles")}
-              className="border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              className="border border-gray-600 dark:border-gray-500 bg-gray-800 dark:bg-gray-700 text-white hover:bg-gray-700 dark:hover:bg-gray-600 px-4 py-2 rounded-md text-sm font-medium transition-colors"
             >
               ← Back to Motorcycles
             </button>
@@ -132,24 +132,24 @@ export default function MotorcycleDetailPage() {
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => router.push("/motorcycles")}
-                className="border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+                className="border border-gray-600 dark:border-gray-500 bg-gray-800 dark:bg-gray-700 text-white hover:bg-gray-700 dark:hover:bg-gray-600 px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
               >
                 ← Back
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                   {motorcycle.year} {motorcycle.brand} {motorcycle.modelName}
                 </h1>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
                   Motorcycle ID: {motorcycle.id}
                 </p>
               </div>
             </div>
             <div className="text-right">
-              <div className="text-2xl font-bold text-orange-600">
+              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
                 {formatCurrency(motorcycle.price)}
               </div>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-gray-600 dark:text-gray-300">
                 {motorcycle.bids.length} bid
                 {motorcycle.bids.length !== 1 ? "s" : ""}
               </div>
