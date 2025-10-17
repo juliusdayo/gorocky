@@ -6,12 +6,16 @@ interface AllBidsProps {
   bids: BidWithBuyer[];
   formatCurrency: (amount: number) => string;
   formatDate: (dateString: string) => string;
+  onAcceptBid?: (bidId: number) => Promise<void>;
+  onRejectBid?: (bidId: number) => Promise<void>;
 }
 
 export default function AllBids({
   bids,
   formatCurrency,
   formatDate,
+  onAcceptBid,
+  onRejectBid,
 }: AllBidsProps) {
   const totalBids = bids.length;
 
@@ -137,6 +141,54 @@ export default function AllBids({
               {bid.expiresAt && (
                 <div className="mt-2 text-xs text-orange-600 dark:text-orange-400">
                   Expires: {formatDate(bid.expiresAt)}
+                </div>
+              )}
+
+              {/* Accept/Reject Buttons - only show for pending bids */}
+              {bid.status === "pending" && (onAcceptBid || onRejectBid) && (
+                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600 flex space-x-2">
+                  {onAcceptBid && (
+                    <button
+                      onClick={() => onAcceptBid(bid.id)}
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-1"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      Accept
+                    </button>
+                  )}
+                  {onRejectBid && (
+                    <button
+                      onClick={() => onRejectBid(bid.id)}
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-1"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                      Reject
+                    </button>
+                  )}
                 </div>
               )}
             </div>

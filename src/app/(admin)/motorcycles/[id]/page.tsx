@@ -12,7 +12,10 @@ import {
   BidSummary,
   AllBids,
 } from "../../../../components/admin/motorcycle/id";
-import { MotorcycleForm, ConfirmationModal } from "../../../../components/admin/motorcycle";
+import {
+  MotorcycleForm,
+  ConfirmationModal,
+} from "../../../../components/admin/motorcycle";
 import { createClient } from "../../../../lib/supabase/client";
 
 export default function MotorcycleDetailPage() {
@@ -147,12 +150,11 @@ export default function MotorcycleDetailPage() {
       }
 
       showToast("Motorcycle deleted successfully!", "success");
-      
+
       // Redirect to motorcycles list after successful deletion
       setTimeout(() => {
         router.push("/motorcycles");
       }, 1500);
-      
     } catch (err) {
       console.error("Error deleting motorcycle:", err);
       const errorMessage =
@@ -168,6 +170,80 @@ export default function MotorcycleDetailPage() {
     setIsEditModalOpen(false);
     loadMotorcycleData(); // Refresh the motorcycle data
     showToast("Motorcycle updated successfully!", "success");
+  };
+
+  const handleAcceptBid = async (bidId: number) => {
+    try {
+      // Get the current session for auth token
+      const supabase = createClient();
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError || !session) {
+        throw new Error("Authentication required. Please sign in again.");
+      }
+
+      const response = await fetch(`/api/bids/${bidId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ status: "accepted" }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to accept bid");
+      }
+
+      showToast("Bid accepted successfully!", "success");
+      loadMotorcycleData(); // Refresh the motorcycle data
+    } catch (err) {
+      console.error("Error accepting bid:", err);
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to accept bid";
+      showToast(errorMessage, "error");
+    }
+  };
+
+  const handleRejectBid = async (bidId: number) => {
+    try {
+      // Get the current session for auth token
+      const supabase = createClient();
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError || !session) {
+        throw new Error("Authentication required. Please sign in again.");
+      }
+
+      const response = await fetch(`/api/bids/${bidId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ status: "rejected" }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to reject bid");
+      }
+
+      showToast("Bid rejected successfully!", "success");
+      loadMotorcycleData(); // Refresh the motorcycle data
+    } catch (err) {
+      console.error("Error rejecting bid:", err);
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to reject bid";
+      showToast(errorMessage, "error");
+    }
   };
 
   if (loading) {
@@ -303,6 +379,8 @@ export default function MotorcycleDetailPage() {
                 bids={motorcycle.bids}
                 formatCurrency={formatCurrency}
                 formatDate={formatDate}
+                onAcceptBid={handleAcceptBid}
+                onRejectBid={handleRejectBid}
               />
             </div>
           </div>
@@ -317,7 +395,7 @@ export default function MotorcycleDetailPage() {
 
           {/* Edit Modal */}
           {isEditModalOpen && motorcycle && (
-            <div 
+            <div
               className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
               onClick={(e) => {
                 if (e.target === e.currentTarget) {
