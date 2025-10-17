@@ -6,6 +6,7 @@ import Footer from "../components/public/Footer";
 import Home from "../components/public/Home";
 import About from "../components/public/About";
 import Contact from "../components/public/Contact";
+import PublicLayout from "../components/public/PublicLayout";
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState("home");
@@ -24,7 +25,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <PublicLayout>
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -32,6 +33,6 @@ export default function HomePage() {
       </main>
 
       <Footer />
-    </div>
+    </PublicLayout>
   );
 }
