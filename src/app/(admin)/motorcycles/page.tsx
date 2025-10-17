@@ -164,7 +164,8 @@ export default function MotorcyclesPage() {
                         ? {
                             id: editingMotorcycle.id,
                             brand_id: editingMotorcycle.brand_id,
-                            brand_name: editingMotorcycle.brand_name ||
+                            brand_name:
+                              editingMotorcycle.brand_name ||
                               editingMotorcycle.brand?.name,
                             year: editingMotorcycle.year,
                             odometer: editingMotorcycle.odometer,

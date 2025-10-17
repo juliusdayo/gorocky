@@ -435,7 +435,8 @@ export default function MotorcycleDetailPage() {
                     initialData={{
                       id: motorcycle.id,
                       brand_id: motorcycle.brand_id,
-                      brand_name: motorcycle.brand_name || motorcycle.brand?.name,
+                      brand_name:
+                        motorcycle.brand_name || motorcycle.brand?.name,
                       year: motorcycle.year,
                       odometer: motorcycle.odometer,
                       modelName: motorcycle.modelName,
