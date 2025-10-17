@@ -17,34 +17,34 @@ export default function BidSummary({
   const totalBids = bids.length;
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
-      <h2 className="text-lg font-medium text-gray-900 mb-4">
+    <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+      <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
         Bidding Summary
       </h2>
 
       {highestBid ? (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Highest Bid</span>
-            <span className="text-lg font-bold text-orange-600">
+            <span className="text-sm text-gray-600 dark:text-gray-300">Highest Bid</span>
+            <span className="text-lg font-bold text-orange-600 dark:text-orange-400">
               {formatCurrency(highestBid.bidAmount)}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Total Bids</span>
-            <span className="font-medium">{totalBids}</span>
+            <span className="text-sm text-gray-600 dark:text-gray-300">Total Bids</span>
+            <span className="font-medium text-gray-900 dark:text-white">{totalBids}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Latest Bid</span>
-            <span className="text-sm text-gray-900">
+            <span className="text-sm text-gray-600 dark:text-gray-300">Latest Bid</span>
+            <span className="text-sm text-gray-900 dark:text-white">
               {formatDate(highestBid.createdAt)}
             </span>
           </div>
         </div>
       ) : (
         <div className="text-center py-4">
-          <div className="text-4xl text-gray-400 mb-2">💰</div>
-          <p className="text-sm text-gray-600">No bids yet</p>
+          <div className="text-4xl text-gray-400 dark:text-gray-500 mb-2">💰</div>
+          <p className="text-sm text-gray-600 dark:text-gray-300">No bids yet</p>
         </div>
       )}
     </div>
