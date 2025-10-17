@@ -23,7 +23,7 @@ export default function MotorcycleDetails({
             Brand
           </dt>
           <dd className="text-sm text-gray-900 dark:text-white">
-            {motorcycle.brand}
+            {motorcycle.brand_name || motorcycle.brand?.name}
           </dd>
         </div>
         <div>

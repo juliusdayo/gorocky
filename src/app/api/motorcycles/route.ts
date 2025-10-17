@@ -19,13 +19,24 @@ export async function GET(request: NextRequest) {
     // Start building the Supabase query
     let query = supabaseServer
       .from("motorcycles")
-      .select("*", { count: "exact" })
+      .select(
+        `
+        *,
+        brands!inner (
+          id,
+          name,
+          logo_url,
+          country_of_origin
+        )
+      `,
+        { count: "exact" }
+      )
       .eq("status", "available") // Only show available motorcycles
       .order("created_at", { ascending: false });
 
     // Apply filters
     if (brand) {
-      query = query.ilike("brand", `%${brand}%`);
+      query = query.ilike("brands.name", `%${brand}%`);
     }
 
     if (minYear) {
@@ -63,7 +74,9 @@ export async function GET(request: NextRequest) {
     const formattedMotorcycles =
       motorcycles?.map((motorcycle) => ({
         id: motorcycle.id,
-        brand: motorcycle.brand,
+        brand_id: motorcycle.brand_id,
+        brand_name: (motorcycle.brands as { name: string })?.name,
+        brand: motorcycle.brands,
         modelName: motorcycle.model_name,
         year: motorcycle.year,
         odometer: motorcycle.odometer,
@@ -130,14 +143,29 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate required fields
-    const { brand, modelName, year, odometer, upgrades = [], price } = body;
+    const { brand_id, modelName, year, odometer, upgrades = [], price } = body;
 
-    if (!brand || !modelName || !year || !odometer || !price) {
+    if (!brand_id || !modelName || !year || !odometer || !price) {
       return NextResponse.json(
         {
           error:
-            "Missing required fields: brand, modelName, year, odometer, price",
+            "Missing required fields: brand_id, modelName, year, odometer, price",
         },
+        { status: 400 }
+      );
+    }
+
+    // Validate that brand_id exists
+    const { data: brandExists } = await supabase
+      .from("brands")
+      .select("id")
+      .eq("id", brand_id)
+      .eq("is_active", true)
+      .single();
+
+    if (!brandExists) {
+      return NextResponse.json(
+        { error: "Invalid brand_id or brand is not active" },
         { status: 400 }
       );
     }
@@ -177,7 +205,7 @@ export async function POST(request: NextRequest) {
       .from("motorcycles")
       .insert([
         {
-          brand: brand.trim(),
+          brand_id,
           model_name: modelName.trim(),
           year,
           odometer,
@@ -187,7 +215,17 @@ export async function POST(request: NextRequest) {
           user_id: user.id,
         },
       ])
-      .select()
+      .select(
+        `
+        *,
+        brands (
+          id,
+          name,
+          logo_url,
+          country_of_origin
+        )
+      `
+      )
       .single();
 
     if (error) {

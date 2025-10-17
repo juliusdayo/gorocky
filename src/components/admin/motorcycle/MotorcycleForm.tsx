@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "../../../lib/supabase/client";
 import Toast from "./Toast";
+import { Brand } from "./types";
 
 interface MotorcycleFormData {
-  brand: string;
+  brand_id: string;
   year: string;
   odometer: string;
   modelName: string;
@@ -18,7 +19,8 @@ interface MotorcycleFormProps {
   onSuccess?: () => void;
   initialData?: {
     id?: number;
-    brand: string;
+    brand_id: number;
+    brand_name?: string;
     year: number;
     odometer: number;
     modelName: string;
@@ -34,8 +36,10 @@ export default function MotorcycleForm({
   initialData,
   mode = "create",
 }: MotorcycleFormProps) {
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [isLoadingBrands, setIsLoadingBrands] = useState(true);
   const [formData, setFormData] = useState<MotorcycleFormData>({
-    brand: initialData?.brand || "",
+    brand_id: initialData?.brand_id?.toString() || "",
     year: initialData?.year?.toString() || "",
     odometer: initialData?.odometer?.toString() || "",
     modelName: initialData?.modelName || "",
@@ -70,7 +74,31 @@ export default function MotorcycleForm({
     setToast((prev) => ({ ...prev, isVisible: false }));
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Fetch brands on component mount
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        setIsLoadingBrands(true);
+        const response = await fetch("/api/brands?active=true");
+        if (!response.ok) {
+          throw new Error("Failed to fetch brands");
+        }
+        const brandsData = await response.json();
+        setBrands(brandsData);
+      } catch (err) {
+        console.error("Error fetching brands:", err);
+        showToast("Failed to load brands. Please refresh the page.", "error");
+      } finally {
+        setIsLoadingBrands(false);
+      }
+    };
+
+    fetchBrands();
+  }, []);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -123,7 +151,7 @@ export default function MotorcycleForm({
       }
 
       const motorcycleData = {
-        brand: formData.brand.trim(),
+        brand_id: parseInt(formData.brand_id),
         modelName: formData.modelName.trim(),
         year: parseInt(formData.year),
         odometer: parseInt(formData.odometer),
@@ -161,7 +189,7 @@ export default function MotorcycleForm({
       // Clear form on success only if creating
       if (!isEditMode) {
         setFormData({
-          brand: "",
+          brand_id: "",
           year: "",
           odometer: "",
           modelName: "",
@@ -206,21 +234,29 @@ export default function MotorcycleForm({
           {/* Brand */}
           <div>
             <label
-              htmlFor="brand"
+              htmlFor="brand_id"
               className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
             >
               Brand *
             </label>
-            <input
-              type="text"
-              id="brand"
-              name="brand"
-              value={formData.brand}
+            <select
+              id="brand_id"
+              name="brand_id"
+              value={formData.brand_id}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white"
-              placeholder="e.g., Honda, Yamaha, Harley-Davidson"
-            />
+              disabled={isLoadingBrands}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+            >
+              <option value="">
+                {isLoadingBrands ? "Loading brands..." : "Select a brand"}
+              </option>
+              {brands.map((brand) => (
+                <option key={brand.id} value={brand.id.toString()}>
+                  {brand.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Model Name */}

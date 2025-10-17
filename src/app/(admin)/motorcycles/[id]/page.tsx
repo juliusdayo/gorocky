@@ -293,7 +293,9 @@ export default function MotorcycleDetailPage() {
               </button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {motorcycle.year} {motorcycle.brand} {motorcycle.modelName}
+                  {motorcycle.year}{" "}
+                  {motorcycle.brand_name || motorcycle.brand?.name}{" "}
+                  {motorcycle.modelName}
                 </h1>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
                   Motorcycle ID: {motorcycle.id}
@@ -432,7 +434,8 @@ export default function MotorcycleDetailPage() {
                     onSuccess={handleEditSuccess}
                     initialData={{
                       id: motorcycle.id,
-                      brand: motorcycle.brand,
+                      brand_id: motorcycle.brand_id,
+                      brand_name: motorcycle.brand_name || motorcycle.brand?.name,
                       year: motorcycle.year,
                       odometer: motorcycle.odometer,
                       modelName: motorcycle.modelName,
@@ -450,7 +453,11 @@ export default function MotorcycleDetailPage() {
           <ConfirmationModal
             isOpen={isDeleteModalOpen}
             title="Delete Motorcycle Listing"
-            message={`Are you sure you want to delete the ${motorcycle?.year} ${motorcycle?.brand} ${motorcycle?.modelName} listing? This action cannot be undone and will also remove all associated bids.`}
+            message={`Are you sure you want to delete the ${motorcycle?.year} ${
+              motorcycle?.brand_name || motorcycle?.brand?.name
+            } ${
+              motorcycle?.modelName
+            } listing? This action cannot be undone and will also remove all associated bids.`}
             confirmText={isDeleting ? "Deleting..." : "Delete"}
             cancelText="Cancel"
             onConfirm={handleDelete}

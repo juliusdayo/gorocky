@@ -18,7 +18,9 @@ export function filterAndSortMotorcycles({
   // Apply search
   if (searchTerm) {
     filtered = filtered.filter((motorcycle) =>
-      `${motorcycle.year} ${motorcycle.brand} ${motorcycle.modelName}`
+      `${motorcycle.year} ${motorcycle.brand_name || motorcycle.brand?.name} ${
+        motorcycle.modelName
+      }`
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
     );
@@ -26,7 +28,11 @@ export function filterAndSortMotorcycles({
 
   // Apply filters
   if (filters.brand) {
-    filtered = filtered.filter((m) => m.brand === filters.brand);
+    filtered = filtered.filter((m) =>
+      (m.brand_name || m.brand?.name || "")
+        .toLowerCase()
+        .includes(filters.brand.toLowerCase())
+    );
   }
 
   if (filters.minYear) {
@@ -82,7 +88,16 @@ export function filterAndSortMotorcycles({
 
 // Helper function to get unique brands from motorcycles
 export function extractUniqueBrands(motorcycles: Motorcycle[]): string[] {
-  return [...new Set(motorcycles.map((m) => m.brand))].sort();
+  return [
+    ...new Set(
+      motorcycles
+        .map((m) => m.brand_name || m.brand?.name)
+        .filter(
+          (brand): brand is string =>
+            typeof brand === "string" && brand.length > 0
+        )
+    ),
+  ].sort();
 }
 
 // Helper function to check if filters are active

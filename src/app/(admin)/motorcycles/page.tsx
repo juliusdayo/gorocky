@@ -159,7 +159,21 @@ export default function MotorcyclesPage() {
                 <div className="p-6">
                   <MotorcycleForm
                     onSuccess={handleFormSuccess}
-                    initialData={editingMotorcycle || undefined}
+                    initialData={
+                      editingMotorcycle
+                        ? {
+                            id: editingMotorcycle.id,
+                            brand_id: editingMotorcycle.brand_id,
+                            brand_name: editingMotorcycle.brand_name ||
+                              editingMotorcycle.brand?.name,
+                            year: editingMotorcycle.year,
+                            odometer: editingMotorcycle.odometer,
+                            modelName: editingMotorcycle.modelName,
+                            upgrades: editingMotorcycle.upgrades,
+                            price: editingMotorcycle.price,
+                          }
+                        : undefined
+                    }
                     mode={editingMotorcycle ? "edit" : "create"}
                   />
                 </div>

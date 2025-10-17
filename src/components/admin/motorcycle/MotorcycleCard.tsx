@@ -50,7 +50,8 @@ export default function MotorcycleCard({
             className="text-lg font-semibold text-gray-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400 cursor-pointer transition-colors"
             title="Click to view details"
           >
-            {motorcycle.year} {motorcycle.brand} {motorcycle.modelName}
+            {motorcycle.year} {motorcycle.brand_name || motorcycle.brand?.name}{" "}
+            {motorcycle.modelName}
           </h3>
           <p className="text-2xl font-bold text-orange-600 mt-1">
             ${motorcycle.price.toLocaleString()}
@@ -155,7 +156,9 @@ export default function MotorcycleCard({
       <ConfirmationModal
         isOpen={showDeleteModal}
         title="Delete Motorcycle Listing"
-        message={`Are you sure you want to delete the ${motorcycle.year} ${motorcycle.brand} ${motorcycle.modelName} listing? This action cannot be undone.`}
+        message={`Are you sure you want to delete the ${motorcycle.year} ${
+          motorcycle.brand_name || motorcycle.brand?.name
+        } ${motorcycle.modelName} listing? This action cannot be undone.`}
         confirmText="Delete"
         cancelText="Cancel"
         onConfirm={handleConfirmDelete}

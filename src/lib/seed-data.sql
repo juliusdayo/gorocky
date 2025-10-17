@@ -5,6 +5,32 @@
 -- Run this after the main database schema has been created
 
 -- ================================================
+-- SAMPLE BRANDS DATA
+-- ================================================
+
+-- Insert popular motorcycle brands
+INSERT INTO brands (name, country_of_origin, founded_year, description) VALUES
+  ('Honda', 'Japan', 1946, 'Japanese multinational conglomerate known for reliable motorcycles'),
+  ('Yamaha', 'Japan', 1955, 'Japanese manufacturer famous for sport and touring motorcycles'),
+  ('Harley-Davidson', 'United States', 1903, 'Iconic American motorcycle manufacturer known for cruisers'),
+  ('Kawasaki', 'Japan', 1896, 'Japanese manufacturer known for high-performance sport bikes'),
+  ('Suzuki', 'Japan', 1909, 'Japanese manufacturer producing a wide range of motorcycles'),
+  ('BMW', 'Germany', 1916, 'German luxury motorcycle manufacturer known for touring bikes'),
+  ('Ducati', 'Italy', 1926, 'Italian manufacturer famous for high-performance sport motorcycles'),
+  ('KTM', 'Austria', 1934, 'Austrian manufacturer known for off-road and sport motorcycles'),
+  ('Triumph', 'United Kingdom', 1902, 'British manufacturer known for classic and modern motorcycles'),
+  ('Indian', 'United States', 1901, 'Historic American motorcycle brand known for cruisers'),
+  ('Aprilia', 'Italy', 1945, 'Italian manufacturer known for sport motorcycles and scooters'),
+  ('Benelli', 'Italy', 1911, 'Italian manufacturer with rich racing heritage'),
+  ('Royal Enfield', 'India', 1901, 'Classic motorcycle manufacturer known for vintage styling'),
+  ('Moto Guzzi', 'Italy', 1921, 'Italian manufacturer famous for V-twin engines'),
+  ('MV Agusta', 'Italy', 1945, 'Premium Italian motorcycle manufacturer'),
+  ('Husqvarna', 'Sweden', 1903, 'Swedish manufacturer known for off-road motorcycles'),
+  ('Zero Motorcycles', 'United States', 2006, 'Electric motorcycle manufacturer'),
+  ('Can-Am', 'Canada', 1973, 'Manufacturer of three-wheeled motorcycles')
+ON CONFLICT (name) DO NOTHING;
+
+-- ================================================
 -- SAMPLE SELLERS DATA
 -- ================================================
 
@@ -172,9 +198,9 @@ ON CONFLICT DO NOTHING;
 -- SAMPLE MOTORCYCLES DATA
 -- ================================================
 
--- Insert sample motorcycles (without seller_id to avoid foreign key issues)
+-- Insert sample motorcycles using brand_id foreign key
 INSERT INTO motorcycles (
-  brand,
+  brand_id,
   model_name,
   year,
   odometer,
@@ -184,7 +210,7 @@ INSERT INTO motorcycles (
   user_id
 ) VALUES 
   (
-    'Ducati',
+    (SELECT id FROM brands WHERE name = 'Ducati'),
     'Panigale V4',
     2023,
     2500,
@@ -194,7 +220,7 @@ INSERT INTO motorcycles (
     '8f612af3-9925-48ca-bc14-4dcf6727d47c'  -- Test user ID for easy cleanup
   ),
   (
-    'BMW',
+    (SELECT id FROM brands WHERE name = 'BMW'),
     'S1000RR',
     2022,
     8750,
@@ -204,7 +230,7 @@ INSERT INTO motorcycles (
     '8f612af3-9925-48ca-bc14-4dcf6727d47c'  -- Test user ID for easy cleanup
   ),
   (
-    'Kawasaki',
+    (SELECT id FROM brands WHERE name = 'Kawasaki'),
     'Ninja H2',
     2021,
     12000,
@@ -214,7 +240,7 @@ INSERT INTO motorcycles (
     '8f612af3-9925-48ca-bc14-4dcf6727d47c'  -- Test user ID for easy cleanup
   ),
   (
-    'Yamaha',
+    (SELECT id FROM brands WHERE name = 'Yamaha'),
     'YZF-R1M',
     2023,
     3200,
@@ -224,7 +250,7 @@ INSERT INTO motorcycles (
     '8f612af3-9925-48ca-bc14-4dcf6727d47c'  -- Test user ID for easy cleanup
   ),
   (
-    'Honda',
+    (SELECT id FROM brands WHERE name = 'Honda'),
     'CBR1000RR-R Fireblade',
     2022,
     6800,
@@ -238,42 +264,47 @@ ON CONFLICT DO NOTHING;
 -- Update motorcycles to link with sellers (using actual seller IDs)
 UPDATE motorcycles 
 SET seller_id = s.id 
-FROM sellers s 
+FROM sellers s, brands b
 WHERE motorcycles.user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c'
   AND s.user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c'
-  AND motorcycles.brand = 'Ducati' 
+  AND motorcycles.brand_id = b.id
+  AND b.name = 'Ducati' 
   AND s.business_name = 'Rocky Mountain Cycles';
 
 UPDATE motorcycles 
 SET seller_id = s.id 
-FROM sellers s 
+FROM sellers s, brands b
 WHERE motorcycles.user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c'
   AND s.user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c'
-  AND motorcycles.brand = 'BMW' 
+  AND motorcycles.brand_id = b.id
+  AND b.name = 'BMW' 
   AND s.business_name = 'Highway Heroes Motorcycles';
 
 UPDATE motorcycles 
 SET seller_id = s.id 
-FROM sellers s 
+FROM sellers s, brands b
 WHERE motorcycles.user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c'
   AND s.user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c'
-  AND motorcycles.brand = 'Kawasaki' 
+  AND motorcycles.brand_id = b.id
+  AND b.name = 'Kawasaki' 
   AND s.business_name = 'Custom Bike Garage';
 
 UPDATE motorcycles 
 SET seller_id = s.id 
-FROM sellers s 
+FROM sellers s, brands b
 WHERE motorcycles.user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c'
   AND s.user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c'
-  AND motorcycles.brand = 'Yamaha' 
+  AND motorcycles.brand_id = b.id
+  AND b.name = 'Yamaha' 
   AND s.business_name = 'Thunder Road Motors';
 
 UPDATE motorcycles 
 SET seller_id = s.id 
-FROM sellers s 
+FROM sellers s, brands b
 WHERE motorcycles.user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c'
   AND s.user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c'
-  AND motorcycles.brand = 'Honda' 
+  AND motorcycles.brand_id = b.id
+  AND b.name = 'Honda' 
   AND s.business_name = 'Precision Performance';
 
 -- ================================================
@@ -301,12 +332,26 @@ BEGIN
   SELECT id INTO emma_id FROM buyers WHERE first_name = 'Emma' AND last_name = 'Chen' AND user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c';
   SELECT id INTO james_id FROM buyers WHERE first_name = 'James' AND last_name = 'Miller' AND user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c';
   
-  -- Get motorcycle IDs
-  SELECT id INTO ducati_id FROM motorcycles WHERE brand = 'Ducati' AND model_name = 'Panigale V4' AND user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c';
-  SELECT id INTO bmw_id FROM motorcycles WHERE brand = 'BMW' AND model_name = 'S1000RR' AND user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c';
-  SELECT id INTO kawasaki_id FROM motorcycles WHERE brand = 'Kawasaki' AND model_name = 'Ninja H2' AND user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c';
-  SELECT id INTO yamaha_id FROM motorcycles WHERE brand = 'Yamaha' AND model_name = 'YZF-R1M' AND user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c';
-  SELECT id INTO honda_id FROM motorcycles WHERE brand = 'Honda' AND model_name = 'CBR1000RR-R Fireblade' AND user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c';
+  -- Get motorcycle IDs using brand_id relationship
+  SELECT m.id INTO ducati_id FROM motorcycles m 
+  JOIN brands b ON m.brand_id = b.id 
+  WHERE b.name = 'Ducati' AND m.model_name = 'Panigale V4' AND m.user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c';
+  
+  SELECT m.id INTO bmw_id FROM motorcycles m 
+  JOIN brands b ON m.brand_id = b.id 
+  WHERE b.name = 'BMW' AND m.model_name = 'S1000RR' AND m.user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c';
+  
+  SELECT m.id INTO kawasaki_id FROM motorcycles m 
+  JOIN brands b ON m.brand_id = b.id 
+  WHERE b.name = 'Kawasaki' AND m.model_name = 'Ninja H2' AND m.user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c';
+  
+  SELECT m.id INTO yamaha_id FROM motorcycles m 
+  JOIN brands b ON m.brand_id = b.id 
+  WHERE b.name = 'Yamaha' AND m.model_name = 'YZF-R1M' AND m.user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c';
+  
+  SELECT m.id INTO honda_id FROM motorcycles m 
+  JOIN brands b ON m.brand_id = b.id 
+  WHERE b.name = 'Honda' AND m.model_name = 'CBR1000RR-R Fireblade' AND m.user_id = '8f612af3-9925-48ca-bc14-4dcf6727d47c';
   
   -- Insert bids using actual IDs (multiple bidders per motorcycle)
   INSERT INTO bids (motorcycle_id, buyer_id, bid_amount, status, message, expires_at) VALUES 

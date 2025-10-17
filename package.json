@@ -1,13 +1,13 @@
 {
   "name": "gorocky",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint",
-    "setup": "node scripts/setup.js"
+    "lint": "eslint"
   },
   "dependencies": {
     "@supabase/auth-ui-react": "^0.4.7",

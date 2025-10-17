@@ -1,7 +1,26 @@
--- Create motorcycles table
+-- ================================================
+-- BRANDS TABLE
+-- ================================================
+
+-- Create brands table
+CREATE TABLE IF NOT EXISTS brands (
+  id BIGSERIAL PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE,
+  logo_url TEXT,
+  country_of_origin TEXT,
+  founded_year INTEGER CHECK (founded_year >= 1800 AND founded_year <= 2030),
+  website_url TEXT,
+  description TEXT,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+
+
+-- Create motorcycles table or alter existing one
 CREATE TABLE IF NOT EXISTS motorcycles (
   id BIGSERIAL PRIMARY KEY,
-  brand TEXT NOT NULL,
   model_name TEXT NOT NULL,
   year INTEGER NOT NULL CHECK (year >= 1900 AND year <= 2030),
   odometer INTEGER NOT NULL CHECK (odometer >= 0),
@@ -12,6 +31,36 @@ CREATE TABLE IF NOT EXISTS motorcycles (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Add brand_id column if it doesn't exist (for existing tables)
+ALTER TABLE motorcycles 
+ADD COLUMN IF NOT EXISTS brand_id BIGINT REFERENCES brands(id) ON DELETE RESTRICT;
+
+-- ================================================
+-- RLS POLICIES FOR BRANDS
+-- ================================================
+
+-- Enable RLS for brands table
+ALTER TABLE brands ENABLE ROW LEVEL SECURITY;
+
+-- Policy: Anyone can view active brands
+DROP POLICY IF EXISTS "Anyone can view active brands" ON brands;
+CREATE POLICY "Anyone can view active brands" ON brands
+  FOR SELECT USING (is_active = true);
+
+-- Policy: Only authenticated users can insert brands (admin functionality)
+DROP POLICY IF EXISTS "Authenticated users can insert brands" ON brands;
+CREATE POLICY "Authenticated users can insert brands" ON brands
+  FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+
+-- Policy: Only authenticated users can update brands (admin functionality)
+DROP POLICY IF EXISTS "Authenticated users can update brands" ON brands;
+CREATE POLICY "Authenticated users can update brands" ON brands
+  FOR UPDATE USING (auth.uid() IS NOT NULL);
+
+-- ================================================
+-- RLS POLICIES FOR MOTORCYCLES
+-- ================================================
 
 -- Create RLS (Row Level Security) policies
 ALTER TABLE motorcycles ENABLE ROW LEVEL SECURITY;
@@ -45,19 +94,20 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Create trigger for updated_at
+-- Create triggers for updated_at
+DROP TRIGGER IF EXISTS update_brands_updated_at ON brands;
+CREATE TRIGGER update_brands_updated_at
+    BEFORE UPDATE ON brands
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
 DROP TRIGGER IF EXISTS update_motorcycles_updated_at ON motorcycles;
 CREATE TRIGGER update_motorcycles_updated_at
     BEFORE UPDATE ON motorcycles
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
--- Insert some sample data (optional)
-INSERT INTO motorcycles (brand, model_name, year, odometer, upgrades, price, status, user_id) VALUES
-  ('Honda', 'CBR600RR', 2020, 15000, ARRAY['Aftermarket exhaust', 'LED headlight'], 12500.00, 'available', '8f612af3-9925-48ca-bc14-4dcf6727d47c'),
-  ('Yamaha', 'R1', 2019, 8500, ARRAY['Carbon fiber bodywork', 'Racing suspension'], 16800.00, 'available', '8f612af3-9925-48ca-bc14-4dcf6727d47c'),
-  ('Harley-Davidson', 'Street Glide', 2021, 5200, ARRAY['Chrome package', 'Sound system upgrade'], 22000.00, 'available', '8f612af3-9925-48ca-bc14-4dcf6727d47c')
-ON CONFLICT DO NOTHING;
+
 
 -- ================================================
 -- BUYERS AND SELLERS TABLES
@@ -241,6 +291,9 @@ CREATE TRIGGER update_bids_updated_at
 -- ================================================
 
 -- Indexes for better query performance
+CREATE INDEX IF NOT EXISTS idx_brands_name ON brands(name);
+CREATE INDEX IF NOT EXISTS idx_brands_is_active ON brands(is_active);
+CREATE INDEX IF NOT EXISTS idx_motorcycles_brand_id ON motorcycles(brand_id);
 CREATE INDEX IF NOT EXISTS idx_sellers_user_id ON sellers(user_id);
 CREATE INDEX IF NOT EXISTS idx_buyers_user_id ON buyers(user_id);
 CREATE INDEX IF NOT EXISTS idx_bids_motorcycle_id ON bids(motorcycle_id);
@@ -261,13 +314,68 @@ ADD COLUMN IF NOT EXISTS seller_id BIGINT REFERENCES sellers(id) ON DELETE SET N
 CREATE INDEX IF NOT EXISTS idx_motorcycles_seller_id ON motorcycles(seller_id);
 
 -- ================================================
+-- MIGRATION SCRIPT FOR EXISTING DATA
+-- ================================================
+
+-- This script helps migrate existing motorcycles that might have brand as TEXT
+-- to use the new brand_id foreign key relationship
+
+-- Create a function to migrate existing brand data
+CREATE OR REPLACE FUNCTION migrate_brand_data() RETURNS void AS $$
+DECLARE
+    rec RECORD;
+BEGIN
+    -- Check if there's a brand column (old schema)
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'motorcycles' AND column_name = 'brand'
+    ) THEN
+        -- Remove NOT NULL constraint from brand column first
+        ALTER TABLE motorcycles ALTER COLUMN brand DROP NOT NULL;
+        
+        -- Migrate existing data
+        FOR rec IN 
+            SELECT DISTINCT brand FROM motorcycles WHERE brand IS NOT NULL
+        LOOP
+            -- Insert brand if it doesn't exist
+            INSERT INTO brands (name, is_active) 
+            VALUES (rec.brand, true) 
+            ON CONFLICT (name) DO NOTHING;
+            
+            -- Update motorcycles to use brand_id
+            UPDATE motorcycles 
+            SET brand_id = (SELECT id FROM brands WHERE name = rec.brand)
+            WHERE brand = rec.brand AND brand_id IS NULL;
+        END LOOP;
+        
+        -- Drop dependent views first, then recreate them with new structure
+        DROP VIEW IF EXISTS motorcycle_details CASCADE;
+        DROP VIEW IF EXISTS bid_details CASCADE;
+        
+        -- Drop the old brand column after migration
+        ALTER TABLE motorcycles DROP COLUMN IF EXISTS brand;
+        
+        -- Recreate the views with the new brand structure
+        -- This will be done after the migration function completes
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Run the migration
+SELECT migrate_brand_data();
+
+-- ================================================
 -- USEFUL VIEWS FOR COMPLEX QUERIES
 -- ================================================
 
--- View to get motorcycle details with seller information
+-- View to get motorcycle details with brand and seller information
+-- (Recreated after migration to use brand_id relationship)
 CREATE OR REPLACE VIEW motorcycle_details AS
 SELECT 
   m.*,
+  br.name as brand_name,
+  br.logo_url as brand_logo,
+  br.country_of_origin as brand_country,
   s.business_name,
   s.contact_phone,
   s.contact_email,
@@ -275,6 +383,7 @@ SELECT
   s.total_sales,
   s.verified as seller_verified
 FROM motorcycles m
+JOIN brands br ON m.brand_id = br.id
 LEFT JOIN sellers s ON m.seller_id = s.id;
 
 -- View to get bid details with buyer and motorcycle information
@@ -285,10 +394,30 @@ SELECT
   by.last_name,
   by.contact_phone as buyer_phone,
   by.contact_email as buyer_email,
-  m.brand,
+  br.name as brand_name,
   m.model_name,
   m.year,
   m.price as asking_price
 FROM bids b
 JOIN buyers by ON b.buyer_id = by.id
-JOIN motorcycles m ON b.motorcycle_id = m.id;
+JOIN motorcycles m ON b.motorcycle_id = m.id
+JOIN brands br ON m.brand_id = br.id;
+
+-- View to get brand statistics
+CREATE OR REPLACE VIEW brand_statistics AS
+SELECT 
+  br.id,
+  br.name,
+  br.logo_url,
+  br.country_of_origin,
+  COUNT(m.id) as total_motorcycles,
+  COUNT(CASE WHEN m.status = 'available' THEN 1 END) as available_motorcycles,
+  COUNT(CASE WHEN m.status = 'sold' THEN 1 END) as sold_motorcycles,
+  AVG(m.price) as average_price,
+  MIN(m.price) as min_price,
+  MAX(m.price) as max_price
+FROM brands br
+LEFT JOIN motorcycles m ON br.id = m.brand_id
+WHERE br.is_active = true
+GROUP BY br.id, br.name, br.logo_url, br.country_of_origin
+ORDER BY total_motorcycles DESC;

@@ -70,7 +70,9 @@ export default function MotorcycleList({
 
     if (filters.brand) {
       filtered = filtered.filter((motorcycle) =>
-        motorcycle.brand.toLowerCase().includes(filters.brand.toLowerCase())
+        (motorcycle.brand_name || motorcycle.brand?.name || "")
+          .toLowerCase()
+          .includes(filters.brand.toLowerCase())
       );
     }
 

@@ -45,21 +45,17 @@ export default function DashboardPage() {
 
         const uniqueSellers = new Set(sellersData?.map((m) => m.user_id) || []);
 
-        // Fetch brand statistics
+        // Fetch brand statistics using a simpler approach
         const { data: brandsData } = await supabase
-          .from("motorcycles")
-          .select("brand")
-          .eq("status", "available");
+          .from("brand_statistics")
+          .select("*")
+          .order("available_motorcycles", { ascending: false });
 
-        const brandCounts: { [key: string]: number } = {};
-        brandsData?.forEach((m) => {
-          brandCounts[m.brand] = (brandCounts[m.brand] || 0) + 1;
-        });
-
-        const brandStats = Object.entries(brandCounts)
-          .map(([brand, count]) => ({ brand, count }))
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 10); // Top 10 brands
+        const brandStats =
+          brandsData?.slice(0, 10).map((brand) => ({
+            brand: brand.name,
+            count: brand.available_motorcycles || 0,
+          })) || [];
 
         setStats({
           totalMotorcycles: motorcycleCount || 0,

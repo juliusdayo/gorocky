@@ -19,10 +19,26 @@ export async function GET(
       );
     }
 
-    // Get motorcycle from Supabase
+    // Get motorcycle from Supabase with brand information
     const { data: motorcycle, error } = await supabaseServer
       .from("motorcycles")
-      .select("*")
+      .select(
+        `
+        *,
+        brands (
+          id,
+          name,
+          logo_url,
+          country_of_origin,
+          founded_year,
+          website_url,
+          description,
+          is_active,
+          created_at,
+          updated_at
+        )
+      `
+      )
       .eq("id", id)
       .eq("status", "available")
       .single();
@@ -42,9 +58,37 @@ export async function GET(
     }
 
     // Format response to match frontend expectations
+    const brandData = motorcycle.brands as {
+      id: number;
+      name: string;
+      logo_url?: string;
+      country_of_origin?: string;
+      founded_year?: number;
+      website_url?: string;
+      description?: string;
+      is_active?: boolean;
+      created_at?: string;
+      updated_at?: string;
+    } | null;
+
     const formattedMotorcycle = {
       id: motorcycle.id,
-      brand: motorcycle.brand,
+      brand_id: motorcycle.brand_id,
+      brand_name: brandData?.name || "Unknown",
+      brand: brandData
+        ? {
+            id: brandData.id,
+            name: brandData.name,
+            logo_url: brandData.logo_url,
+            country_of_origin: brandData.country_of_origin,
+            founded_year: brandData.founded_year,
+            website_url: brandData.website_url,
+            description: brandData.description,
+            is_active: brandData.is_active ?? true,
+            created_at: brandData.created_at ?? new Date().toISOString(),
+            updated_at: brandData.updated_at ?? new Date().toISOString(),
+          }
+        : undefined,
       modelName: motorcycle.model_name,
       year: motorcycle.year,
       odometer: motorcycle.odometer,

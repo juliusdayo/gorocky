@@ -43,7 +43,8 @@ export default function PublicMotorcycleCard({
             onClick={() => onViewDetails(motorcycle.id)}
             className="text-lg font-semibold text-white hover:text-orange-400 cursor-pointer transition-colors"
           >
-            {motorcycle.year} {motorcycle.brand} {motorcycle.modelName}
+            {motorcycle.year} {motorcycle.brand_name || motorcycle.brand?.name}{" "}
+            {motorcycle.modelName}
           </h3>
           <p className="text-2xl font-bold text-orange-400 mt-1">
             {formatCurrency(motorcycle.price)}
