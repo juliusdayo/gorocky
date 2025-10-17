@@ -46,7 +46,7 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
     });
 
     return () => subscription.unsubscribe();
-  }, [onAuthSuccess]);
+  }, [onAuthSuccess, supabase.auth]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -4,20 +4,6 @@ import {
   createSupabaseServerClient,
 } from "../../../lib/supabase/server";
 
-interface Motorcycle {
-  id: number;
-  brand: string;
-  model_name: string;
-  year: number;
-  odometer: number;
-  upgrades: string[];
-  price: number;
-  status: string;
-  user_id?: string;
-  created_at: string;
-  updated_at: string;
-}
-
 export async function GET(request: NextRequest) {
   try {
     // Get query parameters for filtering/pagination

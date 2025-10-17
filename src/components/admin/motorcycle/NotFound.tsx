@@ -1,4 +1,10 @@
-export default function NotFound(params: any) {
+import { MotorcycleFilters } from "./types";
+
+interface NotFoundProps {
+  filters: MotorcycleFilters;
+}
+
+export default function NotFound({ filters }: NotFoundProps) {
   return (
     <div className="text-center py-12">
       <svg
@@ -19,7 +25,7 @@ export default function NotFound(params: any) {
         No motorcycles found
       </h3>
       <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        {Object.values(params.filters).some((value) => value)
+        {Object.values(filters).some((value) => value)
           ? "Try adjusting your filters or add your first motorcycle listing."
           : "Get started by adding your first motorcycle listing."}
       </p>
