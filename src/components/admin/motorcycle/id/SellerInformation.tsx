@@ -18,27 +18,38 @@ export default function SellerInformation({ seller }: SellerInformationProps) {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <h3 className="font-medium text-gray-900 dark:text-white">{seller.businessName}</h3>
+            <h3 className="font-medium text-gray-900 dark:text-white">
+              {seller.businessName}
+            </h3>
             {seller.verified && (
-              <span className="text-orange-500 dark:text-orange-400" title="Verified Seller">
+              <span
+                className="text-orange-500 dark:text-orange-400"
+                title="Verified Seller"
+              >
                 ✓
               </span>
             )}
           </div>
           {seller.rating && (
-            <div className="text-sm text-gray-600 dark:text-gray-300">★ {seller.rating}/5</div>
+            <div className="text-sm text-gray-600 dark:text-gray-300">
+              ★ {seller.rating}/5
+            </div>
           )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div className="flex items-center space-x-2">
             <span className="text-gray-400 dark:text-gray-500">📧</span>
-            <span className="text-gray-900 dark:text-white">{seller.contactEmail}</span>
+            <span className="text-gray-900 dark:text-white">
+              {seller.contactEmail}
+            </span>
           </div>
           {seller.contactPhone && (
             <div className="flex items-center space-x-2">
               <span className="text-gray-400 dark:text-gray-500">📞</span>
-              <span className="text-gray-900 dark:text-white">{seller.contactPhone}</span>
+              <span className="text-gray-900 dark:text-white">
+                {seller.contactPhone}
+              </span>
             </div>
           )}
           <div className="flex items-center space-x-2">

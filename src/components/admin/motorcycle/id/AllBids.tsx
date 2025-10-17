@@ -64,7 +64,9 @@ export default function AllBids({
                     {bid.buyer.firstName} {bid.buyer.lastName}
                   </span>
                   {bid.buyer.verified && (
-                    <span className="text-orange-500 dark:text-orange-400">✓</span>
+                    <span className="text-orange-500 dark:text-orange-400">
+                      ✓
+                    </span>
                   )}
                   {getBidStatusIcon(bid.status) && (
                     <span
@@ -142,8 +144,12 @@ export default function AllBids({
         </div>
       ) : (
         <div className="text-center py-8">
-          <div className="text-4xl text-gray-400 dark:text-gray-500 mb-3">💰</div>
-          <p className="text-sm text-gray-600 dark:text-gray-300">No bids have been placed yet</p>
+          <div className="text-4xl text-gray-400 dark:text-gray-500 mb-3">
+            💰
+          </div>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            No bids have been placed yet
+          </p>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             Bids will appear here as they are submitted
           </p>

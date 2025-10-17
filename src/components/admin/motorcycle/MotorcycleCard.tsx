@@ -8,11 +8,13 @@ import ConfirmationModal from "./ConfirmationModal";
 interface MotorcycleCardProps {
   motorcycle: Motorcycle;
   onDelete: (id: number) => Promise<void>;
+  onEdit?: (motorcycle: Motorcycle) => void;
 }
 
 export default function MotorcycleCard({
   motorcycle,
   onDelete,
+  onEdit,
 }: MotorcycleCardProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const router = useRouter();
@@ -33,6 +35,12 @@ export default function MotorcycleCard({
   const handleViewDetails = () => {
     router.push(`/motorcycles/${motorcycle.id}`);
   };
+
+  const handleEditClick = () => {
+    if (onEdit) {
+      onEdit(motorcycle);
+    }
+  };
   return (
     <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow">
       <div className="flex justify-between items-start mb-4">
@@ -49,6 +57,27 @@ export default function MotorcycleCard({
           </p>
         </div>
         <div className="flex gap-2">
+          {onEdit && (
+            <button
+              onClick={handleEditClick}
+              className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
+              title="Edit listing"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                />
+              </svg>
+            </button>
+          )}
           <button
             onClick={handleDeleteClick}
             className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"

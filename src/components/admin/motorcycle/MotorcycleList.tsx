@@ -13,6 +13,7 @@ interface MotorcycleListProps {
   loading?: boolean;
   error?: string;
   onRefresh?: () => void;
+  onEdit?: (motorcycle: Motorcycle) => void;
 }
 
 export default function MotorcycleList({
@@ -20,6 +21,7 @@ export default function MotorcycleList({
   loading: propLoading = false,
   error: propError = "",
   onRefresh,
+  onEdit,
 }: MotorcycleListProps) {
   const [motorcycles, setMotorcycles] = useState<Motorcycle[]>(propMotorcycles);
   const [loading, setLoading] = useState(propLoading);
@@ -213,6 +215,7 @@ export default function MotorcycleList({
               key={motorcycle.id}
               motorcycle={motorcycle}
               onDelete={handleDelete}
+              onEdit={onEdit}
             />
           ))}
         </div>

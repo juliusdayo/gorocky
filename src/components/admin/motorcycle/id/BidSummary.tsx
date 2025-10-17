@@ -25,17 +25,25 @@ export default function BidSummary({
       {highestBid ? (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600 dark:text-gray-300">Highest Bid</span>
+            <span className="text-sm text-gray-600 dark:text-gray-300">
+              Highest Bid
+            </span>
             <span className="text-lg font-bold text-orange-600 dark:text-orange-400">
               {formatCurrency(highestBid.bidAmount)}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600 dark:text-gray-300">Total Bids</span>
-            <span className="font-medium text-gray-900 dark:text-white">{totalBids}</span>
+            <span className="text-sm text-gray-600 dark:text-gray-300">
+              Total Bids
+            </span>
+            <span className="font-medium text-gray-900 dark:text-white">
+              {totalBids}
+            </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600 dark:text-gray-300">Latest Bid</span>
+            <span className="text-sm text-gray-600 dark:text-gray-300">
+              Latest Bid
+            </span>
             <span className="text-sm text-gray-900 dark:text-white">
               {formatDate(highestBid.createdAt)}
             </span>
@@ -43,8 +51,12 @@ export default function BidSummary({
         </div>
       ) : (
         <div className="text-center py-4">
-          <div className="text-4xl text-gray-400 dark:text-gray-500 mb-2">💰</div>
-          <p className="text-sm text-gray-600 dark:text-gray-300">No bids yet</p>
+          <div className="text-4xl text-gray-400 dark:text-gray-500 mb-2">
+            💰
+          </div>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            No bids yet
+          </p>
         </div>
       )}
     </div>

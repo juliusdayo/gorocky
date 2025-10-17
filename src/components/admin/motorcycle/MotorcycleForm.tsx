@@ -16,19 +16,31 @@ interface MotorcycleFormData {
 interface MotorcycleFormProps {
   onSubmit?: (data: MotorcycleFormData) => void;
   onSuccess?: () => void;
+  initialData?: {
+    id?: number;
+    brand: string;
+    year: number;
+    odometer: number;
+    modelName: string;
+    upgrades: string[];
+    price: number;
+  };
+  mode?: "create" | "edit";
 }
 
 export default function MotorcycleForm({
   onSubmit,
   onSuccess,
+  initialData,
+  mode = "create",
 }: MotorcycleFormProps) {
   const [formData, setFormData] = useState<MotorcycleFormData>({
-    brand: "",
-    year: "",
-    odometer: "",
-    modelName: "",
-    upgrades: [],
-    price: "",
+    brand: initialData?.brand || "",
+    year: initialData?.year?.toString() || "",
+    odometer: initialData?.odometer?.toString() || "",
+    modelName: initialData?.modelName || "",
+    upgrades: initialData?.upgrades || [],
+    price: initialData?.price?.toString() || "",
   });
 
   const [currentUpgrade, setCurrentUpgrade] = useState("");
@@ -120,8 +132,14 @@ export default function MotorcycleForm({
         status: "available",
       };
 
-      const response = await fetch("/api/motorcycles", {
-        method: "POST",
+      const isEditMode = mode === "edit" && initialData?.id;
+      const url = isEditMode
+        ? `/api/motorcycles/${initialData.id}`
+        : "/api/motorcycles";
+      const method = isEditMode ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session.access_token}`,
@@ -132,22 +150,25 @@ export default function MotorcycleForm({
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          errorData.error || "Failed to create motorcycle listing"
+          errorData.error ||
+            `Failed to ${isEditMode ? "update" : "create"} motorcycle listing`
         );
       }
 
       const result = await response.json();
-      console.log("Motorcycle created:", result);
+      console.log(`Motorcycle ${isEditMode ? "updated" : "created"}:`, result);
 
-      // Clear form on success
-      setFormData({
-        brand: "",
-        year: "",
-        odometer: "",
-        modelName: "",
-        upgrades: [],
-        price: "",
-      });
+      // Clear form on success only if creating
+      if (!isEditMode) {
+        setFormData({
+          brand: "",
+          year: "",
+          odometer: "",
+          modelName: "",
+          upgrades: [],
+          price: "",
+        });
+      }
 
       // Call optional callbacks
       if (onSubmit) {
@@ -157,7 +178,10 @@ export default function MotorcycleForm({
         onSuccess();
       }
 
-      showToast("Motorcycle listed successfully!", "success");
+      showToast(
+        `Motorcycle ${isEditMode ? "updated" : "listed"} successfully!`,
+        "success"
+      );
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "An error occurred";
@@ -350,7 +374,13 @@ export default function MotorcycleForm({
             disabled={isSubmitting}
             className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-lg transition-colors text-lg"
           >
-            {isSubmitting ? "Listing Motorcycle..." : "List My Motorcycle"}
+            {isSubmitting
+              ? mode === "edit"
+                ? "Updating Motorcycle..."
+                : "Listing Motorcycle..."
+              : mode === "edit"
+              ? "Update Motorcycle"
+              : "List My Motorcycle"}
           </button>
         </div>
       </form>

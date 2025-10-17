@@ -14,6 +14,9 @@ export default function MotorcyclesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingMotorcycle, setEditingMotorcycle] = useState<Motorcycle | null>(
+    null
+  );
 
   const handleFetchMotorcycles = useCallback(async () => {
     try {
@@ -45,6 +48,7 @@ export default function MotorcyclesPage() {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isModalOpen) {
         setIsModalOpen(false);
+        setEditingMotorcycle(null);
       }
     };
 
@@ -54,17 +58,25 @@ export default function MotorcyclesPage() {
 
   const handleModalClose = () => {
     setIsModalOpen(false);
+    setEditingMotorcycle(null);
   };
 
   const handleModalBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       setIsModalOpen(false);
+      setEditingMotorcycle(null);
     }
   };
 
   const handleFormSuccess = () => {
     setIsModalOpen(false);
-    handleFetchMotorcycles(); // Refresh the list after adding a new motorcycle
+    setEditingMotorcycle(null);
+    handleFetchMotorcycles(); // Refresh the list after adding/editing a motorcycle
+  };
+
+  const handleEdit = (motorcycle: Motorcycle) => {
+    setEditingMotorcycle(motorcycle);
+    setIsModalOpen(true);
   };
 
   return (
@@ -109,6 +121,7 @@ export default function MotorcyclesPage() {
             loading={loading}
             error={error}
             onRefresh={handleFetchMotorcycles}
+            onEdit={handleEdit}
           />
 
           {/* Modal */}
@@ -120,7 +133,9 @@ export default function MotorcyclesPage() {
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    Add New Motorcycle
+                    {editingMotorcycle
+                      ? "Edit Motorcycle"
+                      : "Add New Motorcycle"}
                   </h2>
                   <button
                     onClick={handleModalClose}
@@ -142,7 +157,11 @@ export default function MotorcyclesPage() {
                   </button>
                 </div>
                 <div className="p-6">
-                  <MotorcycleForm onSuccess={handleFormSuccess} />
+                  <MotorcycleForm
+                    onSuccess={handleFormSuccess}
+                    initialData={editingMotorcycle || undefined}
+                    mode={editingMotorcycle ? "edit" : "create"}
+                  />
                 </div>
               </div>
             </div>

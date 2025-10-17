@@ -19,25 +19,41 @@ export default function MotorcycleDetails({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <dt className="text-sm font-medium text-gray-500 dark:text-gray-300">Brand</dt>
-          <dd className="text-sm text-gray-900 dark:text-white">{motorcycle.brand}</dd>
+          <dt className="text-sm font-medium text-gray-500 dark:text-gray-300">
+            Brand
+          </dt>
+          <dd className="text-sm text-gray-900 dark:text-white">
+            {motorcycle.brand}
+          </dd>
         </div>
         <div>
-          <dt className="text-sm font-medium text-gray-500 dark:text-gray-300">Model</dt>
-          <dd className="text-sm text-gray-900 dark:text-white">{motorcycle.modelName}</dd>
+          <dt className="text-sm font-medium text-gray-500 dark:text-gray-300">
+            Model
+          </dt>
+          <dd className="text-sm text-gray-900 dark:text-white">
+            {motorcycle.modelName}
+          </dd>
         </div>
         <div>
-          <dt className="text-sm font-medium text-gray-500 dark:text-gray-300">Year</dt>
-          <dd className="text-sm text-gray-900 dark:text-white">{motorcycle.year}</dd>
+          <dt className="text-sm font-medium text-gray-500 dark:text-gray-300">
+            Year
+          </dt>
+          <dd className="text-sm text-gray-900 dark:text-white">
+            {motorcycle.year}
+          </dd>
         </div>
         <div>
-          <dt className="text-sm font-medium text-gray-500 dark:text-gray-300">Odometer</dt>
+          <dt className="text-sm font-medium text-gray-500 dark:text-gray-300">
+            Odometer
+          </dt>
           <dd className="text-sm text-gray-900 dark:text-white">
             {motorcycle.odometer.toLocaleString()} miles
           </dd>
         </div>
         <div>
-          <dt className="text-sm font-medium text-gray-500 dark:text-gray-300">Status</dt>
+          <dt className="text-sm font-medium text-gray-500 dark:text-gray-300">
+            Status
+          </dt>
           <dd className="text-sm">
             <span
               className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${
@@ -53,7 +69,9 @@ export default function MotorcycleDetails({
           </dd>
         </div>
         <div>
-          <dt className="text-sm font-medium text-gray-500 dark:text-gray-300">Listed</dt>
+          <dt className="text-sm font-medium text-gray-500 dark:text-gray-300">
+            Listed
+          </dt>
           <dd className="text-sm text-gray-900 dark:text-white">
             {formatDate(motorcycle.createdAt)}
           </dd>
@@ -62,7 +80,9 @@ export default function MotorcycleDetails({
 
       {motorcycle.upgrades && motorcycle.upgrades.length > 0 && (
         <div className="mt-4">
-          <dt className="text-sm font-medium text-gray-500 dark:text-gray-300 mb-2">Upgrades</dt>
+          <dt className="text-sm font-medium text-gray-500 dark:text-gray-300 mb-2">
+            Upgrades
+          </dt>
           <div className="flex flex-wrap gap-2">
             {motorcycle.upgrades.map((upgrade, index) => (
               <span
