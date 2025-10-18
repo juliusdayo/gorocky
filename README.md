@@ -93,7 +93,7 @@ npm install
 
    - Go to your Supabase project's SQL Editor
    - Run the database schema: `src/lib/database-schema.sql`
-   - Optional: Run sample data: `src/lib/seed-data.sql`
+   - Run sample data: `src/lib/seed-data.sql`
 
 5. **Run the development server**
 
@@ -296,3 +296,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Database and Auth by [Supabase](https://supabase.com/)
 - Styled with [Tailwind CSS](https://tailwindcss.com/)
 - Icons from [Heroicons](https://heroicons.com/)
+- AI Development Assistant: [Claude Sonnet 4](https://www.anthropic.com/) - Used for code generation, debugging, and architectural guidance
